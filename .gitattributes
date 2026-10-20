@@ -1,0 +1,12 @@
+# Normalise line endings to LF in the repository and on checkout on every
+# platform (Windows-native, WSL2, Linux HPC nodes). Git for Windows with
+# core.autocrlf=true would otherwise write CRLF into working trees that are
+# also read from WSL2.
+* text=auto eol=lf
+
+# Binary files
+*.xlsx binary
+*.png binary
+*.jpg binary
+*.npz binary
+*.npy binary

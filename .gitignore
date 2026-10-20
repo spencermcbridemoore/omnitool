@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.python-version.local
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+
+# Generated device / host builds (cudasim shared objects, NVRTC caches)
+src/omnitool/**/_build/
+*.so
+*.dll
+*.pyd
+*.cubin
+*.ptx
+
+# Benchmark outputs: manifests are committed deliberately under benchmarks/results/
+benchmarks/scratch/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code local state
+.claude/settings.local.json

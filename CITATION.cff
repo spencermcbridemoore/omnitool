@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use omnitool, please cite it using the metadata below."
+title: "omnitool: a common GPU ensemble ODE core"
+type: software
+version: 0.0.0
+date-released: "2026-10-19"
+license: Apache-2.0
+repository-code: "https://github.com/spencermcbridemoore/omnitool"
+authors:
+  - family-names: "McBride Moore"
+    given-names: "Spencer"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+keywords:
+  - ordinary differential equations
+  - GPU
+  - CUDA
+  - ensemble integration
+  - Runge-Kutta
+abstract: >-
+  omnitool integrates many independent members of an ODE ensemble on a GPU
+  with per-member adaptive stepping, dense output at shared save times, FP32
+  and FP64 as first-class configurations, and a verification layer that is
+  independent of the device code. Physics packages attach through thin,
+  optional adapters.

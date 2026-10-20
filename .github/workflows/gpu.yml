@@ -1,0 +1,55 @@
+name: GPU tests (self-hosted RTX 4090)
+
+# Runs ONLY when a maintainer dispatches it. It is never triggered by
+# pull_request events, so code from forks never executes on the workstation.
+# To add a nightly run later, add a `schedule:` trigger here; keep the
+# repository guard below.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to test (branch, tag or SHA)"
+        required: false
+        default: "main"
+      precision:
+        description: "Precision(s) to run"
+        required: false
+        default: "both"
+        type: choice
+        options: [both, fp32, fp64]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpu-runner
+  cancel-in-progress: false
+
+jobs:
+  cuda-tests:
+    name: cuda backend
+    # Only the canonical repository may use the self-hosted runner.
+    if: github.repository == 'spencermcbridemoore/omnitool'
+    runs-on: [self-hosted, gpu, rtx4090]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Show the device
+        run: nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv
+      - name: Install with the CUDA extra
+        # The runner's driver decides the CUDA major; keep this in step with it.
+        run: uv sync --locked --group dev --extra cuda12
+      - name: Run the cuda backend
+        run: uv run pytest --backend cuda -m gpu -ra
+      - name: Upload benchmark manifests, if any
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-manifests
+          path: benchmarks/results/**/manifest.json
+          if-no-files-found: ignore

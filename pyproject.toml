@@ -1,0 +1,121 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "omnitool"
+dynamic = ["version"]
+description = "Common GPU ensemble ODE core: per-member adaptive integration of many independent systems, FP32 and FP64, with thin adapters for physics packages."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Spencer McBride Moore" }]
+keywords = ["ode", "gpu", "cuda", "ensemble", "runge-kutta", "cupy"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Environment :: GPU :: NVIDIA CUDA",
+]
+dependencies = [
+  "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+# Real-GPU backend. Pick the wheel that matches the installed driver's CUDA
+# major version; the core imports `cupy` lazily so the package works without it.
+cuda12 = ["cupy-cuda12x>=13.0"]
+cuda13 = ["cupy-cuda13x>=13.0"]
+# Verification layer references (SciPy DOP853 / Radau, expm).
+test = [
+  "scipy>=1.12",
+  "pytest>=8.0",
+  "pytest-xdist>=3.5",
+]
+# Adapters are added here as optional extras in later phases, e.g.
+# rydiqule = ["rydiqule==2.1.3"]
+
+[project.urls]
+Homepage = "https://github.com/spencermcbridemoore/omnitool"
+Issues = "https://github.com/spencermcbridemoore/omnitool/issues"
+Changelog = "https://github.com/spencermcbridemoore/omnitool/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = [
+  { include-group = "lint" },
+  "scipy>=1.12",
+  "pytest>=8.0",
+  "pytest-xdist>=3.5",
+  "pre-commit>=3.7",
+]
+lint = [
+  "ruff>=0.6",
+  "pyright>=1.1.380",
+]
+
+[tool.hatch.version]
+path = "src/omnitool/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/omnitool"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/omnitool", "tests", "docs/adr", "docs/PHASE0_SPEC.md", "CHANGELOG.md", "CITATION.cff"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+xfail_strict = true
+markers = [
+  "gpu: needs a CUDA device (runs only on the self-hosted runner)",
+  "slow: takes more than a few seconds on CPU",
+]
+filterwarnings = ["error::DeprecationWarning:omnitool"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py311"
+src = ["src", "tests"]
+extend-exclude = ["docs"]  # prose; ruff would otherwise format Markdown code blocks
+
+[tool.ruff.lint]
+select = [
+  "E", "W",   # pycodestyle
+  "F",        # pyflakes
+  "I",        # isort
+  "UP",       # pyupgrade
+  "B",        # bugbear
+  "NPY",      # numpy
+  "RUF",      # ruff-specific
+  "SIM",      # simplify
+  "PT",       # pytest style
+]
+ignore = [
+  "E741",     # ambiguous single-letter names: h, k, y are the domain's names
+  "RUF001", "RUF002", "RUF003",  # unicode in comments/docstrings (Σ, ρ, …)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B011"]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.pyright]
+include = ["src", "tests"]
+exclude = ["docs", "**/__pycache__", ".venv"]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+reportMissingImports = "warning"
+reportMissingModuleSource = "none"
+venvPath = "."
+venv = ".venv"
