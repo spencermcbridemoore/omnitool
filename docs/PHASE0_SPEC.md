@@ -182,8 +182,10 @@ rendered device header reproduces every coefficient to within 1 ulp of
 run with `fixed_step = T/N` for `N in {40, 80, 160, 320, 640}`, measure
 `max|y(T) - y_ref(T)|`, fit `log(err)` against `log(h)` by least squares.
 Assert `4.5 <= slope <= 5.5` and `err(N=640) < 5e-9`.
-*FP32 variant:* same, keep only the points with `err > 1e-6`, require at
-least three such points, assert `slope >= 4.0`.
+*FP32 variant:* same measurement with `N in {20, 40, 80}` only (coarser
+steps leave the asymptotic regime; from `N = 160` on, FP32 roundoff is of
+the order of the truncation error), assert `slope >= 4.0` over the three
+points and `err(N=80) < 1e-4`.
 
 **T3 — Error-estimator scaling and non-vanishing (one step on L, Delta = 2,
 FP64)**: for `h in {0.5, 0.25, 0.125, 0.0625, 0.03125}` take one DOPRI5 step

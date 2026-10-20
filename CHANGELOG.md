@@ -22,8 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `cpu` backend of `omnitool.solve_batch`, with `Problem`, `BatchResult` and
   `Status`.
 - Test problems L, S1, S2 (`tests/problems.py`) and the `cpu` rows of
-  T2, T3, T5 and T7. T2's FP32 variant on S2 is a strict xfail carrying the
-  measured errors (roundoff floor reached before the spec's `1e-6` filter).
+  T2, T3, T5 and T7.
+
+### Changed
+
+- Spec T2, FP32 variant: measured over `N in {20, 40, 80}` with no error
+  filter, after recalibration showed the previous `err > 1e-6` filter could
+  not separate truncation from FP32 roundoff on S2. The xfail is gone.
 
 ## [0.0.0] - 2026-10-19
 
