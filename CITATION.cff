@@ -7,9 +7,9 @@ date-released: "2026-10-19"
 license: Apache-2.0
 repository-code: "https://github.com/spencermcbridemoore/omnitool"
 authors:
-  - family-names: "McBride Moore"
-    given-names: "Spencer"
-    # orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: "Moore"
+    given-names: "Spencer McBride"
+    orcid: "https://orcid.org/0009-0004-8382-9531"
 keywords:
   - ordinary differential equations
   - GPU
