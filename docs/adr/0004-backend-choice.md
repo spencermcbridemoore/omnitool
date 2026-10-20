@@ -1,6 +1,6 @@
 # ADR 0004: GPU backend choice for Phase 0
 
-- Status: accepted, pending the Phase 0 spike
+- Status: accepted; spike passed 2026-10-20 (see "Spike result" below)
 - Date: 2026-10-19
 
 ## Context
@@ -39,3 +39,33 @@ synchronisation. If any point fails, this ADR is revised, not worked around.
   tested on every push. Only `cuda` exercises NVRTC and the hardware.
 - Kernel text lives in `.cu` files and templating in Python, so kernels stay
   readable, diffable and compilable with `nvcc`.
+
+## Spike result (2026-10-20)
+
+Run on the workstation RTX 4090 (cc 8.9), driver 610.88 (CUDA 13.3), CuPy
+14.2.0 (`cupy-cuda13x`), NVRTC 13.1, with `benchmarks/spike/nvrtc_spike.py`.
+NVRTC options passed: `-std=c++11 -lineinfo`; no fast-math flags.
+
+| point | result |
+|---|---|
+| compile and launch through `RawModule` | passes; `axpy` on 2^20 elements exact to ≤ 0.5 ulp |
+| FP32 and FP64 from one source via a `real_t` typedef substituted in Python | passes |
+| `__ballot_sync` full-warp vote | passes; 8 warp masks equal the host expectation |
+| timing with explicit stream synchronisation, compile time separate | passes; compile 26–112 ms, launch 7–9 µs for 2^20 elements |
+
+**Finding.** `cupy.RawModule(code=...)` appends `-ftz=true` to every NVRTC
+compile (`cupy/cuda/compiler.py`, `_compile_with_cache_cuda`), after the
+caller's options, so a caller's `-ftz=false` is overridden. On the device an
+FP32 subnormal loaded from memory came back as zero after `x * 1` and
+`x + 0`. That violates the fast-math rule of ADR 0002 ("no `ftz`"). FP64 is
+unaffected.
+
+Calling NVRTC directly through `cupy_backends.cuda.libs.nvrtc` with exactly
+our options, writing the cubin, and loading it with `RawModule(path=...)`
+keeps subnormals and passes every point above at the same launch cost.
+
+**Decision stands, with one amendment to the consequences.** The `cuda`
+backend compiles through the NVRTC binding directly and loads the cubin with
+`RawModule(path=...)`; it never uses `RawModule(code=...)`. CuPy still owns
+arrays, streams and memory. A test in the verification layer asserts on the
+device that an FP32 subnormal survives a multiply.

@@ -8,6 +8,10 @@ See ``docs/PHASE0_SPEC.md`` for the first vertical slice and ``docs/adr/``
 for the design decisions.
 """
 
+from omnitool.api import solve_batch
+from omnitool.problem import BatchResult, Problem
+from omnitool.status import Status
+
 __version__ = "0.0.0"
 
-__all__ = ["__version__"]
+__all__ = ["BatchResult", "Problem", "Status", "__version__", "solve_batch"]
