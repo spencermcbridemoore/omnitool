@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `omnitool.backends.nvrtc`: the single definition of the NVRTC option set
+  (`-ftz=false -prec-div=true -prec-sqrt=true -fmad=true`, no fast-math),
+  compiling through the NVRTC binding and loading cubins with
+  `RawModule(path=...)`. `tests/test_nvrtc_flags.py` makes the spike's FP32
+  subnormal probe a permanent device test; ADR 0004 records the option set.
+- `src/omnitool/status.h`, the device-side status codes, with a test that it
+  matches the `Status` enum.
+- Tests T4 (tolerance-scaled agreement), T6 (batch-order invariance, now two
+  single-`Problem` batches), T8 (status codes and validation) and T9
+  (cross-backend agreement; skipped until a device backend is registered).
 - ADR 0004 spike (`benchmarks/spike/nvrtc_spike.py`) passed on the RTX 4090;
   result recorded in the ADR. Finding: `cupy.RawModule(code=...)` forces
   `-ftz=true`, so the `cuda` backend will compile through NVRTC directly and
@@ -30,6 +40,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Controller: on the first accepted step after a rejection the step may not
+  grow (`h_new = min(h_new, h)`, the `REJECT` rule of `dopri5.f`); spec §3
+  and the reference follow it, and every T7 cap still holds at both
+  precisions.
+- Spec T4: the tighter FP32 tolerance pair is `(2e-5, 1e-7)`; the previous
+  `rtol = 1e-5` sat below the spec's own `100 * eps32` floor.
 - Spec T2, FP32 variant, is now a precision-consistency test: FP32 and FP64
   endpoints agree to `100 * eps32 * max(1, ymax)` at every `N`, and a slope
   is fitted only when three or more points sit above the `100 * eps32`

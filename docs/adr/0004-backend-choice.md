@@ -65,5 +65,12 @@ keeps subnormals and passes every point above at the same launch cost.
 **Decision stands, with one amendment to the consequences.** The `cuda`
 backend compiles through the NVRTC binding directly and loads the cubin with
 `RawModule(path=...)`; it never uses `RawModule(code=...)`. CuPy still owns
-arrays, streams and memory. A test in the verification layer asserts on the
-device that an FP32 subnormal survives a multiply.
+arrays, streams and memory.
+
+**NVRTC option set** (`omnitool.backends.nvrtc.NVRTC_OPTIONS`, the only
+place it is defined): `-std=c++11 -lineinfo -ftz=false -prec-div=true
+-prec-sqrt=true -fmad=true -arch=sm_XY`. The four IEEE flags are passed
+explicitly rather than relied on as defaults; `-fmad=true` is the FMA
+contraction ADR 0002 allows. `tests/test_nvrtc_flags.py` asserts the set
+contains no fast-math flag and, on a device, that an FP32 subnormal survives
+`x * 1` and `x + 0` through this path.

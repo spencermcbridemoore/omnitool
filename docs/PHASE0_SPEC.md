@@ -86,7 +86,9 @@ rationals and rendered to 17 significant digits.
 `fac = clamp(err^alpha / err_old^beta / safe, 0.1, 5.0)`,
 `h_new = h / fac`. After an accepted step `err_old = max(err, 1e-4)`. After a
 rejection `h_new = h / min(5.0, err^alpha / safe)` (no growth) and
-`err_old` is unchanged.
+`err_old` is unchanged. On the first accepted step after a rejection the
+step may not grow: `h_new = min(h_new, h)` (the `REJECT` rule of
+`dopri5.f`).
 
 **Initial step.** Hairer's `hinit` (HNW I, §II.4, eq. 4.14) with the member's
 own `y0` and `f(t0, y0)`, unless `h0` is given.
@@ -212,7 +214,10 @@ let `ymax = max|y_ref|` over the save grid and
 | precision | `(rtol, atol)` pairs           |
 |-----------|--------------------------------|
 | FP64      | `(1e-7, 1e-9)`, `(1e-10, 1e-12)` |
-| FP32      | `(1e-4, 1e-6)`, `(1e-5, 1e-7)`   |
+| FP32      | `(1e-4, 1e-6)`, `(2e-5, 1e-7)`   |
+
+(The FP32 `rtol` floor of §2 is `100 * eps32 = 1.19e-5`, so the tighter
+FP32 pair sits just above it.)
 
 **T5 — Dense-output accuracy**: on S2, one fixed step from `y0` of size
 `h in {0.2, 0.1, 0.05}`, interpolate at `theta = 0.5`, compare with DOP853 at
@@ -221,12 +226,13 @@ halving, that `dense(theta = 0) == y_n` and `dense(theta = 1) == y_n+1`
 bitwise, and that in T4 the error at save times that are not step endpoints
 satisfies the same `bound`.
 
-**T6 — Batch-order invariance**: build a batch of 64 members by cycling the
-four L problems and S1, S2 with per-member perturbations of `y0` by
-`1e-3 * member_index`; solve; solve again with the members permuted by a
-fixed random permutation (seed 0); un-permute. Assert `y`, `status` and all
-counters are **bitwise equal** (`np.array_equal`) on every backend and
-precision.
+**T6 — Batch-order invariance**: a batch holds one `Problem`, so two
+batches of 64 members: L with the four `Delta` values cycled through the
+members, and S2; in both, `y0` is perturbed by `1e-3 * member_index`.
+Solve; solve again with the members permuted by a fixed random permutation
+(seed 0); un-permute. Assert `y`, `status` and all counters are **bitwise
+equal** (`np.array_equal`) on every backend and precision, and that the L
+batch's `n_accepted` is not constant across members (per-member stepping).
 
 **T7 — Step and evaluation caps** (FP64 `(1e-7, 1e-9)`; FP32 `(1e-4, 1e-6)`):
 

@@ -18,6 +18,8 @@ Numerics (spec §3):
   ``alpha = 0.2 - 0.75 beta``, ``safe = 0.9``, factor clamped to
   ``[0.1, 5]``; ``err_old = max(err, 1e-4)`` after an accepted step, unchanged
   after a rejection; after a rejection ``h_new = h / min(5, err^alpha / safe)``;
+  on the first accepted step after a rejection the new step may not grow
+  (``h_new = min(h_new, h)``, the ``REJECT`` rule of ``dopri5.f``);
 - initial step by Hairer's ``hinit`` (HNW I, §II.4, eq. 4.14) unless ``h0``;
 - the last step lands exactly on ``t_end``; following ``dopri5.f`` the step
   is set to ``t_end - t`` as soon as ``t + 1.01 h`` would pass ``t_end``, so
@@ -285,6 +287,7 @@ def integrate(
     n_fev = 0
     h_last = cs.zero
     err_old = cs.err_old_floor
+    rejected_last = False
     status = NOT_RUN
 
     save_idx = 0
@@ -348,6 +351,10 @@ def integrate(
                 fac = err**cs.alpha / err_old**cs.beta / cs.safe
                 fac = min(max(fac, cs.fac_min), cs.fac_max)
                 h_new = h / fac
+                if rejected_last:
+                    # dopri5.f: no growth on the first accept after a reject.
+                    h_new = min(h_new, h)
+                    rejected_last = False
                 err_old = max(err, cs.err_old_floor)
             t = t_new
             y = y_new
@@ -355,6 +362,7 @@ def integrate(
             h = dtype(h_new)
         else:
             n_rejected += 1
+            rejected_last = True
             h = dtype(h / min(cs.fac_max, err**cs.alpha / cs.safe))
 
     return MemberResult(out, status, n_accepted, n_rejected, n_fev, float(h_last))
