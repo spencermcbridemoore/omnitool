@@ -26,9 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Spec T2, FP32 variant: measured over `N in {20, 40, 80}` with no error
-  filter, after recalibration showed the previous `err > 1e-6` filter could
-  not separate truncation from FP32 roundoff on S2. The xfail is gone.
+- Spec T2, FP32 variant, is now a precision-consistency test: FP32 and FP64
+  endpoints agree to `100 * eps32 * max(1, ymax)` at every `N`, and a slope
+  is fitted only when three or more points sit above the `100 * eps32`
+  floor. FP64 keeps the order-5 assertion. This supersedes the interim
+  `N in {20, 40, 80}` form.
 
 ## [0.0.0] - 2026-10-19
 

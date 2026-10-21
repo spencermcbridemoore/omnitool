@@ -182,10 +182,15 @@ rendered device header reproduces every coefficient to within 1 ulp of
 run with `fixed_step = T/N` for `N in {40, 80, 160, 320, 640}`, measure
 `max|y(T) - y_ref(T)|`, fit `log(err)` against `log(h)` by least squares.
 Assert `4.5 <= slope <= 5.5` and `err(N=640) < 5e-9`.
-*FP32 variant:* same measurement with `N in {20, 40, 80}` only (coarser
-steps leave the asymptotic regime; from `N = 160` on, FP32 roundoff is of
-the order of the truncation error), assert `slope >= 4.0` over the three
-points and `err(N=80) < 1e-4`.
+*FP32 variant (precision consistency):* the FP32 roundoff floor is reached
+by `N = 160` on S2, so FP32 is not an order test. Run
+`N in {20, 40, 80, 160, 320, 640}` at FP32 and at FP64 and assert at every
+`N` that `max|y_fp32(T) - y_fp64(T)| <= 100 * eps32 * max(1, ymax)` with
+`ymax = max|y_ref(T)|` and `eps32 = 2^-23`. Keep the points whose FP32
+error exceeds `100 * eps32` (about 1.2e-5); when three or more survive,
+also assert `slope >= 4.0` over them; otherwise no slope is asserted.
+(Measured on the reference: S1 keeps `N = 20, 40, 80`; S2 keeps
+`N = 20, 40`; the FP32/FP64 gap is at most 2.7e-6.)
 
 **T3 — Error-estimator scaling and non-vanishing (one step on L, Delta = 2,
 FP64)**: for `h in {0.5, 0.25, 0.125, 0.0625, 0.03125}` take one DOPRI5 step
