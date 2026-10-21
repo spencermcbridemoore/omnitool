@@ -6,12 +6,12 @@ import warnings
 
 import numpy as np
 
+import omnitool.backends as backends
 from omnitool.problem import BatchResult, Problem
 
-__all__ = ["BACKENDS", "PRECISIONS", "solve_batch"]
+__all__ = ["PRECISIONS", "solve_batch"]
 
 PRECISIONS: dict[str, type[np.floating]] = {"fp32": np.float32, "fp64": np.float64}
-BACKENDS = ("cpu", "cudasim", "cuda")
 
 
 def _cast_checked(name: str, arr: np.ndarray, dtype: type[np.floating]) -> np.ndarray:
@@ -51,8 +51,7 @@ def solve_batch(
     """
     if precision not in PRECISIONS:
         raise ValueError(f"precision must be one of {tuple(PRECISIONS)}, got {precision!r}")
-    if backend not in BACKENDS:
-        raise ValueError(f"backend must be one of {BACKENDS}, got {backend!r}")
+    run = backends.get(backend)  # ValueError if unknown, NotImplementedError if not built
     dtype = PRECISIONS[precision]
     eps = float(np.finfo(dtype).eps)
     if rtol < 100 * eps:
@@ -91,11 +90,7 @@ def solve_batch(
     params_c = _cast_checked("params", params_arr, dtype)
     t_save_c = t_save_arr.astype(dtype)
 
-    if backend == "cpu":
-        from omnitool.backends.cpu import solve_batch_cpu
-
-        return solve_batch_cpu(
-            problem, y0_c, params_c, t0, t_end, t_save_c, rtol, atol, dtype,
-            max_steps, h0, fixed_step,
-        )  # fmt: skip
-    raise NotImplementedError(f"backend {backend!r} is not implemented yet (Phase 0 in progress)")
+    return run(
+        problem, y0_c, params_c, t0, t_end, t_save_c, rtol, atol, dtype,
+        max_steps, h0, fixed_step,
+    )  # fmt: skip

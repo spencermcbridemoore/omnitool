@@ -25,7 +25,9 @@ Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
 - **Never materialise a full parameter stack.** Assemble each member's
   system on-chip, integrate it, reduce on-chip.
 - **Kernel sources stay backend-agnostic** (ADR 0004): plain C in `.cu`
-  files, templated from Python, compilable as host C++ for `cudasim`.
+  files, templated from Python, compiled by NVRTC through
+  `omnitool.backends.nvrtc` with the IEEE option set and never through
+  `RawModule(code=...)`, which forces `ftz`.
 
 ## Correctness rules
 
@@ -90,9 +92,12 @@ Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
   for FP64 production runs and all published benchmarks. Do not run IDE
   remote servers or heavy processes on login nodes; compute nodes may lack
   internet, so prefetch dependencies.
-- **CI.** CPU tests (`cpu` and `cudasim` backends) run on every push and
-  pull request. The `cuda` backend runs only on the self-hosted 4090 runner
-  through a `workflow_dispatch` job, never for fork pull requests.
+- **CI.** The `cpu` backend runs on every push and pull request. The `cuda`
+  backend runs only on the self-hosted 4090 runner through a
+  `workflow_dispatch` job, never for fork pull requests. There is no CPU
+  simulator of the kernels in Phase 0 (ADR 0005), so **run the `cuda` tests
+  on the workstation before pushing any kernel change** and say so, with
+  driver and CuPy versions, in the pull request.
 
 ## Roles in Claude Code sessions
 
@@ -109,8 +114,9 @@ Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
 
 - `src/` layout, `pyproject.toml`, `uv` lock; Python ≥ 3.11.
 - `pre-commit` with ruff and pyright must pass before a commit.
-- Tests are parameterised by the `backend` fixture (`cpu`, `cudasim`,
-  `cuda`); the `cuda` case skips cleanly without a device.
+- Tests are parameterised by the `backend` fixture over the implemented
+  backends (`omnitool.backends.available()`); the `cuda` case skips cleanly
+  without a device, and an unbuilt backend produces no xfails.
 - `CHANGELOG.md` follows Keep a Changelog; every user-visible change gets a
   line under `Unreleased` in the same commit.
 - Work only on the current phase. Flag scope creep instead of acting on it.

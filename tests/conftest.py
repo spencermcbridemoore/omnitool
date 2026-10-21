@@ -1,25 +1,28 @@
 """Shared fixtures.
 
-The ``backend`` fixture parameterises every test that takes it over the three
-execution backends of ``docs/PHASE0_SPEC.md`` section 5. ``cuda`` skips
-cleanly when CuPy or a device is absent, so the same test files run on a
-laptop, in GitHub Actions and on the self-hosted 4090 runner.
+The ``backend`` fixture parameterises every test that takes it over the
+backends that are **implemented in this checkout**
+(:func:`omnitool.backends.available`), never over names the spec merely
+reserves (ADR 0005), so an unbuilt backend produces no xfails or skips.
+``cuda``, once registered, is additionally skipped when CuPy or a device is
+absent, so the same files run on a laptop, in GitHub Actions and on the
+self-hosted 4090 runner.
 
-Restrict with ``pytest --backend cpu --backend cudasim``.
+Restrict with ``pytest --backend cpu``.
 """
 
 from __future__ import annotations
 
 import pytest
 
-BACKENDS = ("cpu", "cudasim", "cuda")
+import omnitool.backends
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
         "--backend",
         action="append",
-        choices=BACKENDS,
+        choices=omnitool.backends.KNOWN,
         default=None,
         help="restrict the backend fixture to these backends (repeatable)",
     )
@@ -39,9 +42,10 @@ def _cuda_available() -> bool:
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     if "backend" not in metafunc.fixturenames:
         return
-    wanted = metafunc.config.getoption("--backend") or list(BACKENDS)
+    implemented = omnitool.backends.available()
+    wanted = metafunc.config.getoption("--backend") or list(implemented)
     params = []
-    for name in BACKENDS:
+    for name in implemented:
         if name not in wanted:
             continue
         marks: list[pytest.MarkDecorator] = []

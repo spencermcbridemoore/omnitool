@@ -33,7 +33,7 @@ result = omnitool.solve_batch(
                         #   t_save[-1] == t_end
     rtol=1e-7, atol=1e-9,
     precision="fp64",   # "fp32" | "fp64"
-    backend="cuda",     # "cpu" | "cudasim" | "cuda"
+    backend="cuda",     # "cpu" | "cuda" (omnitool.backends.KNOWN)
     max_steps=100_000,  # accepted + rejected steps per member
     h0=None,            # None -> automatic initial step
     fixed_step=None,    # float -> controller bypassed (test use only)
@@ -125,11 +125,13 @@ contraction is allowed; no fast-math flags (ADR 0002).
 | backend   | what runs                                                     |
 |-----------|---------------------------------------------------------------|
 | `cpu`     | `reference/dopri5_numpy.py`: plain NumPy, one member at a time, written from the paper, shares only the tableau file |
-| `cudasim` | `dopri5.cu` compiled as host C++ through `shim.h` (redefines `__device__`, `__global__`, thread index), loaded with `ctypes`, members in a serial loop |
-| `cuda`    | `dopri5.cu` through CuPy `RawModule`/NVRTC on the device      |
+| `cuda`    | `dopri5.cu` compiled by NVRTC through `omnitool.backends.nvrtc` (ADR 0004 option set) and loaded with `RawModule(path=...)` |
 
-`cpu` is the oracle. `cudasim` runs the real kernel logic on every CI push.
-`cuda` runs on the self-hosted 4090 runner only.
+`cpu` is the oracle and runs on every CI push. `cuda` runs on the
+workstation's 4090 before every kernel push and on the self-hosted runner.
+A host-compiled `cudasim` build is deferred by ADR 0005. Tests parameterise
+over `omnitool.backends.available()`, the registry of implemented backends,
+so an unbuilt backend produces no xfails.
 
 ## 6. Status codes
 
@@ -165,10 +167,10 @@ Save grid for adaptive tests: `t_save = linspace(0, T, 51)`.
 
 ## 8. Acceptance tests (concrete assertions)
 
-Each test is parameterised over `backend in {cpu, cudasim, cuda}` (the
-`cuda` case skips without a device) and, where stated, over precision. All
-tests must pass on `cpu` and `cudasim` in CI and on `cuda` on the 4090
-before any benchmark number is recorded.
+Each test is parameterised over the implemented backends (the `cuda` case
+skips without a device) and, where stated, over precision. All tests must
+pass on `cpu` in CI and on `cuda` on the 4090 before any benchmark number is
+recorded.
 
 **T1 — Tableau identities** (precision-independent, on the rational
 transcription):
@@ -198,7 +200,7 @@ from `y0` and record `est = max|h (b - b̂)·k|` and
 `true = max|y_1 - y_exact(h)|`. Assert, for every consecutive pair,
 `4.5 <= log2(est(h)/est(h/2)) <= 5.5`; assert `est(h) >= true(h)` for every
 `h` and `est(h) > 1e-12` for every `h` (the estimate must not vanish on a
-linear problem). The same assertions run on `cudasim` and `cuda` with the
+linear problem). The same assertions run on `cuda` with the
 device `step()` exposed through a test entry point.
 
 **T4 — Agreement with reference under tolerance-scaled bounds**
@@ -249,8 +251,8 @@ returns `NON_FINITE` after at most one step; the `IntEnum` equals the header.
 **T9 — CPU reference independence and GPU-vs-CPU agreement**: the NumPy
 reference imports only `numpy` and the tableau module; a test asserts that
 `reference/dopri5_numpy.py` contains no `import` of `omnitool.backends`.
-For every problem in T4, `cuda` and `cudasim` results agree with `cpu` to
-`max|Δy| <= 2 * bound` (the T4 bound) and
+For every problem in T4, each implemented device backend agrees with `cpu`
+to `max|Δy| <= 2 * bound` (the T4 bound) and
 `|n_accepted - n_accepted_cpu| <= max(2, 0.02 * n_accepted_cpu)`. FMA and
 summation order differ, and one differently-judged accept/reject decision
 changes the whole step sequence, so bitwise equality is **not** asserted
@@ -271,7 +273,7 @@ is quoted until T1–T9 pass on `cuda`.
 ## 10. Definition of done
 
 Phase 0 is complete when, on the first tagged commit after the scaffold:
-T1–T9 pass on `cpu` and `cudasim` in GitHub Actions and on `cuda` on the
+T1–T9 pass on `cpu` in GitHub Actions and on `cuda` on the
 4090 runner; the ADR 0004 spike checklist is recorded as passed in ADR 0004;
 `bench_dopri5.py` has produced one manifest at each precision; and
 `CHANGELOG.md` lists the slice under `Unreleased`.

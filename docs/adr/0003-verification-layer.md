@@ -38,8 +38,8 @@ benchmark"):
 
 - Each new tableau arrives with its NumPy reference, identities test and
   estimator test in one pull request.
-- Tests run under `cpu`, `cudasim` and `cuda` backends; the first two on
-  every push, the last on the gated 4090 runner.
+- Tests run under the implemented backends (`cpu` on every push, `cuda` on
+  the 4090; see ADR 0005 on the deferred `cudasim`).
 - Adapters are tested against their upstream package, not the core.
 - The ROS3P finding is filed upstream to cubie with `ros3p_numpy.py`; ROS3P
   is never a default here.

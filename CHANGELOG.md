@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Status`.
 - Test problems L, S1, S2 (`tests/problems.py`) and the `cpu` rows of
   T2, T3, T5 and T7.
+- ADR 0005: no host-compiled `cudasim` backend in Phase 0. The backend
+  registry `omnitool.backends.available()` lists implemented backends only,
+  and the pytest `backend` fixture parameterises over it, so an unbuilt
+  backend produces no xfails. `omnitool.backends.KNOWN` is `("cpu", "cuda")`.
 
 ### Changed
 
@@ -31,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is fitted only when three or more points sit above the `100 * eps32`
   floor. FP64 keeps the order-5 assertion. This supersedes the interim
   `N in {20, 40, 80}` form.
+- CI runs the `cpu` backend only; `cudasim` is gone from the workflow, the
+  spec's backend table, `AGENTS.md` and the README (ADR 0005).
 
 ## [0.0.0] - 2026-10-19
 

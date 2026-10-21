@@ -19,7 +19,9 @@ def test_version_matches_citation() -> None:
 
 
 def test_backend_fixture_parametrises(backend: str) -> None:
-    assert backend in {"cpu", "cudasim", "cuda"}
+    import omnitool.backends
+
+    assert backend in omnitool.backends.available()
     if backend == "cuda":
         import cupy  # type: ignore[import-not-found]
 

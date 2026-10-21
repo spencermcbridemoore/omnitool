@@ -34,10 +34,9 @@ uv run pre-commit install
 uv run pytest
 ```
 
-Tests are parameterised over three backends: `cpu` (plain-NumPy reference),
-`cudasim` (the kernel template compiled for the host) and `cuda` (CuPy +
-NVRTC on a device). The `cuda` case skips without a GPU; restrict with
-`--backend cpu --backend cudasim`. To run on a GPU:
+Tests are parameterised over the implemented backends: `cpu` (plain-NumPy
+reference) and, once registered, `cuda` (NVRTC on a device). The `cuda`
+case skips without a GPU; restrict with `--backend cpu`. To run on a GPU:
 
 ```bash
 uv sync --group dev --extra cuda12   # or cuda13, matching your driver

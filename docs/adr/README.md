@@ -10,3 +10,4 @@ superseded record keeps its file and gains a "Superseded by" line.
 | [0002](0002-precision-policy.md) | Precision policy |
 | [0003](0003-verification-layer.md) | Verification layer |
 | [0004](0004-backend-choice.md) | GPU backend choice for Phase 0 |
+| [0005](0005-no-cudasim-in-phase-0.md) | No host-compiled `cudasim` backend in Phase 0 |

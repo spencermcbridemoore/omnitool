@@ -33,10 +33,8 @@ synchronisation. If any point fails, this ADR is revised, not worked around.
 
 - Runtime dependency: `cupy` for the chosen CUDA major version. NVRTC ships in
   the CuPy wheels, so no local toolkit is needed.
-- The `cudasim` backend compiles the same `.cu` template as host C++ through
-  a shim header (`__device__`, `__global__` and the thread-index macros
-  redefined) and runs members in a serial loop, so the real kernel logic is
-  tested on every push. Only `cuda` exercises NVRTC and the hardware.
+- A host-compiled `cudasim` build of the kernel template was planned here;
+  ADR 0005 defers it. Only `cuda` exercises the kernels in Phase 0.
 - Kernel text lives in `.cu` files and templating in Python, so kernels stay
   readable, diffable and compilable with `nvcc`.
 

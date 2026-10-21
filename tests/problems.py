@@ -12,7 +12,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
-import pytest
 from scipy.integrate import solve_ivp
 from scipy.linalg import expm
 
@@ -26,6 +25,7 @@ __all__ = [
     "S2",
     "T_END",
     "Case",
+    "reference_on_grid",
     "save_grid",
     "solve",
 ]
@@ -223,6 +223,18 @@ def save_grid(t_end: float = T_END, n: int = 51) -> np.ndarray:
     return np.linspace(0.0, t_end, n)
 
 
+_REFERENCE_CACHE: dict[tuple[str, bytes], np.ndarray] = {}
+
+
+def reference_on_grid(case: Case, t: np.ndarray) -> np.ndarray:
+    """``case.reference(t)``, memoised: the DOP853 references are slow."""
+    t = np.asarray(t, dtype=np.float64)
+    key = (case.name, t.tobytes())
+    if key not in _REFERENCE_CACHE:
+        _REFERENCE_CACHE[key] = case.reference(t)
+    return _REFERENCE_CACHE[key]
+
+
 def solve(
     backend: str,
     case: Case,
@@ -232,25 +244,17 @@ def solve(
     t_end: float | None = None,
     **kwargs,
 ) -> BatchResult:
-    """Run one member of ``case`` on ``backend``.
-
-    Backends that do not exist yet raise ``NotImplementedError`` from the
-    public API; those rows are marked xfail here so the spec-shaped tests
-    keep their parametrisation.
-    """
+    """Run one member of ``case`` on ``backend``."""
     t_end = case.t_end if t_end is None else t_end
     if t_save is None:
         t_save = save_grid(t_end)
-    try:
-        return omnitool.solve_batch(
-            case.problem,
-            case.y0[None, :],
-            case.params[None, :],
-            t_span=(0.0, t_end),
-            t_save=t_save,
-            precision=precision,
-            backend=backend,
-            **kwargs,
-        )
-    except NotImplementedError as exc:
-        pytest.xfail(str(exc))
+    return omnitool.solve_batch(
+        case.problem,
+        case.y0[None, :],
+        case.params[None, :],
+        t_span=(0.0, t_end),
+        t_save=t_save,
+        precision=precision,
+        backend=backend,
+        **kwargs,
+    )
