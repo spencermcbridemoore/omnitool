@@ -19,6 +19,9 @@ class Problem:
 
     ``rhs_cuda`` is the body of
     ``void rhs(real_t t, const real_t* y, real_t* dydt, const real_t* p)``.
+    Floating constants in it are written ``REAL(0.5)`` so that they take the
+    precision of the build; a bare ``0.5`` would promote an FP32 kernel to
+    double arithmetic.
     """
 
     name: str

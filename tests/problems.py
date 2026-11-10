@@ -3,7 +3,7 @@
 Each :class:`Case` bundles a :class:`omnitool.Problem` with the initial
 state, parameters, end time and a high-accuracy reference solution. The
 NumPy right-hand sides keep the dtype of ``y`` so an FP32 run stays FP32.
-The C bodies are placeholders until the kernel exists.
+The C bodies write floating constants as ``REAL(...)`` for the same reason.
 """
 
 from __future__ import annotations
@@ -31,8 +31,6 @@ __all__ = [
 ]
 
 T_END = 10.0
-
-RHS_CUDA_PLACEHOLDER = "/* C body supplied with the Phase 0 kernel; not written yet */"
 
 
 @dataclass(frozen=True)
@@ -64,12 +62,20 @@ def bloch_rhs(t, y, p):
     )
 
 
+BLOCH_RHS_CUDA = """
+    const real_t Gamma = p[0], Omega = p[1], Delta = p[2];
+    const real_t u = y[0], v = y[1], w = y[2];
+    dydt[0] = -REAL(0.5) * Gamma * u + Delta * v;
+    dydt[1] = -Delta * u - REAL(0.5) * Gamma * v - Omega * w;
+    dydt[2] = Omega * v - Gamma * (w + 1);
+"""
+
 BLOCH = Problem(
     name="bloch",
     n_state=3,
     n_params=3,
     rhs_numpy=bloch_rhs,
-    rhs_cuda=RHS_CUDA_PLACEHOLDER,
+    rhs_cuda=BLOCH_RHS_CUDA,
 )
 
 
@@ -130,12 +136,21 @@ def chirp_rhs(t, y, p):
     )
 
 
+CHIRP_RHS_CUDA = """
+    const real_t Gamma = p[0], Omega = p[1];
+    const real_t Delta = REAL(2.0) + REAL(3.0) * sin(REAL(1.5) * t);
+    const real_t u = y[0], v = y[1], w = y[2];
+    dydt[0] = -REAL(0.5) * Gamma * u + Delta * v;
+    dydt[1] = -Delta * u - REAL(0.5) * Gamma * v - Omega * w;
+    dydt[2] = Omega * v - Gamma * (w + 1);
+"""
+
 CHIRP = Problem(
     name="chirp",
     n_state=3,
     n_params=2,
     rhs_numpy=chirp_rhs,
-    rhs_cuda=RHS_CUDA_PLACEHOLDER,
+    rhs_cuda=CHIRP_RHS_CUDA,
 )
 
 
@@ -148,12 +163,17 @@ def duffing_rhs(t, y, p):
     return np.array([y[1], -y[0] - y[0] * y[0] * y[0]], dtype=y.dtype)
 
 
+DUFFING_RHS_CUDA = """
+    dydt[0] = y[1];
+    dydt[1] = -y[0] - y[0] * y[0] * y[0];
+"""
+
 DUFFING = Problem(
     name="duffing",
     n_state=2,
     n_params=0,
     rhs_numpy=duffing_rhs,
-    rhs_cuda=RHS_CUDA_PLACEHOLDER,
+    rhs_cuda=DUFFING_RHS_CUDA,
 )
 
 

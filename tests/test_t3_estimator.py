@@ -8,7 +8,6 @@ linear constant-coefficient problem (the ROS3P failure of ADR 0003).
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from omnitool.reference import dopri5_numpy as ref
 from problems import L_BY_DELTA
@@ -19,10 +18,14 @@ CASE = L_BY_DELTA[2.0]
 
 def one_step(backend: str, h: float) -> tuple[np.ndarray, np.ndarray]:
     """``(y_1, h (b - b̂)·k)`` after one DOPRI5 step from ``y0`` on ``backend``."""
-    if backend != "cpu":
-        pytest.xfail(f"device step() entry point for {backend!r} not implemented yet")
     y0 = CASE.y0.astype(np.float64)
     p = CASE.params.astype(np.float64)
+    if backend == "cuda":
+        from omnitool.backends.cuda import step_cuda
+
+        y1, err_vec = step_cuda(CASE.problem, y0[None, :], p[None, :], 0.0, h, np.float64)
+        return y1[0], err_vec[0]
+    assert backend == "cpu", backend
     rhs = CASE.problem.rhs_numpy
     k1 = rhs(np.float64(0.0), y0, p)
     y1, _k, err_vec = ref.step(rhs, np.float64(0.0), y0, np.float64(h), p, k1, np.float64)

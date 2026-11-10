@@ -7,10 +7,11 @@ verification layer that is independent of the device code. Physics packages
 (RydIQule, pylcp, MoleCool, a UCN spin tracker, …) attach through thin,
 optional adapters.
 
-**Status: pre-alpha, Phase 0.** The repository holds the design record and
-the scaffold; the first kernel (Dormand–Prince 5(4), thread-per-member) is
-specified in [`docs/PHASE0_SPEC.md`](docs/PHASE0_SPEC.md) and is the next
-piece of work. Nothing here solves an ODE yet.
+**Status: pre-alpha, Phase 0.** The first vertical slice of
+[`docs/PHASE0_SPEC.md`](docs/PHASE0_SPEC.md) runs: Dormand–Prince 5(4),
+thread-per-member, per-member adaptive stepping with dense output, FP32 and
+FP64, on the `cpu` reference and on the `cuda` backend, with acceptance tests
+T1–T9 passing on both. No benchmark has been run yet.
 
 ## Where to read
 
@@ -35,7 +36,7 @@ uv run pytest
 ```
 
 Tests are parameterised over the implemented backends: `cpu` (plain-NumPy
-reference) and, once registered, `cuda` (NVRTC on a device). The `cuda`
+reference) and `cuda` (NVRTC on a device). The `cuda`
 case skips without a GPU; restrict with `--backend cpu`. To run on a GPU:
 
 ```bash

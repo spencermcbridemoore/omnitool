@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The `cuda` backend (`omnitool.backends.cuda`, registered in
+  `omnitool.backends`): the DOPRI5 kernel template
+  `src/omnitool/kernels/dopri5.cu` (plain C, one thread per member, PI
+  controller, `hinit`, dense output at shared save times, status codes from
+  `status.h`), rendered for a problem by `omnitool.kernels.render_dopri5`
+  with the tableau taken from `omnitool.tableaus.dopri5`, and compiled only
+  through `omnitool.backends.nvrtc`. `solve_batch(..., backend="cuda")` now
+  runs at FP32 and FP64.
+- Device entry points for one `step()` and one `dense()` evaluation
+  (`step_cuda`, `dense_cuda`), so T3 and T5 run on the device.
+- C right-hand sides for test problems L, S1 and S2. Floating constants in a
+  `Problem.rhs_cuda` body are written `REAL(0.5)`.
+- T1–T9 pass on `cuda` on the RTX 4090 at both precisions; T9 (device vs
+  `cpu`) now runs, carries the `gpu` marker and skips without a device or
+  when `--backend` excludes the device backend.
+- `tests/test_kernel_template.py`: the templater is tested in CPU CI, and on
+  a device an FP32 build of the kernel is checked to contain no
+  double-precision instruction. T6 gains a 300-member batch that spans
+  several 128-thread blocks.
+- The `cuda` backend rejects `max_steps` above 357 913 940 (the `n_fev`
+  counter is an int32) and names the CuPy extras when CuPy is missing.
+
 ## [0.1.0] - 2026-10-21
 
 The Phase 0 design record, the DOPRI5 NumPy reference and the full CPU

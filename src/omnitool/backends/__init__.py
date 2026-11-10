@@ -19,15 +19,15 @@ KNOWN: tuple[str, ...] = ("cpu", "cuda")
 # name -> (module, attribute) of the ``solve_batch_<name>`` entry point.
 _ENTRY_POINTS: dict[str, tuple[str, str]] = {
     "cpu": ("omnitool.backends.cpu", "solve_batch_cpu"),
-    # "cuda": ("omnitool.backends.cuda", "solve_batch_cuda"),  # registered with the kernel
+    "cuda": ("omnitool.backends.cuda", "solve_batch_cuda"),
 }
 
 
 def available() -> tuple[str, ...]:
     """Backends implemented in this checkout, in ``KNOWN`` order.
 
-    A backend is available when its entry point imports; ``cuda`` will
-    additionally require CuPy and a device at call time, which the test
+    A backend is available when it is registered here; ``cuda``
+    additionally requires CuPy and a device at call time, which the test
     fixture checks separately.
     """
     out = []

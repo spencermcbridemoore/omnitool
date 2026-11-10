@@ -83,3 +83,29 @@ def test_permuting_members_only_permutes_outputs(
     if make_batch is _l_batch:
         # Per-member stepping: members with different detunings take different paths.
         assert len(np.unique(direct.n_accepted)) > 1
+
+
+def test_batch_spans_several_blocks(backend: str, precision: str) -> None:
+    """Every member of a batch larger than one 128-thread block is integrated (spec §4).
+
+    Identical members must give identical results, so a launch grid that is
+    not rounded up shows as ``NOT_RUN`` and NaN in the tail of the batch.
+    """
+    n_members = 300  # two full blocks and a partial one
+    y0 = np.tile(S2.y0, (n_members, 1)).astype(DTYPES[precision])
+    res = omnitool.solve_batch(
+        S2.problem,
+        y0,
+        np.zeros((n_members, 0), dtype=DTYPES[precision]),
+        t_span=(0.0, 10.0),
+        t_save=np.array([0.0, 5.0, 10.0]),
+        rtol=1e-4,
+        atol=1e-6,
+        precision=precision,
+        backend=backend,
+        fixed_step=1.0,
+    )
+    assert np.all(res.status == Status.SUCCESS)
+    assert np.all(res.n_accepted == 10)
+    assert np.all(np.isfinite(res.y))
+    assert np.array_equal(res.y, np.broadcast_to(res.y[:1], res.y.shape))

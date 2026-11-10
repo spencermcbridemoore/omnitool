@@ -4,7 +4,7 @@ The ``backend`` fixture parameterises every test that takes it over the
 backends that are **implemented in this checkout**
 (:func:`omnitool.backends.available`), never over names the spec merely
 reserves (ADR 0005), so an unbuilt backend produces no xfails or skips.
-``cuda``, once registered, is additionally skipped when CuPy or a device is
+``cuda`` is additionally skipped when CuPy or a device is
 absent, so the same files run on a laptop, in GitHub Actions and on the
 self-hosted 4090 runner.
 
@@ -28,7 +28,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
 
 
-def _cuda_available() -> bool:
+def cuda_available() -> bool:
     try:
         import cupy  # type: ignore[import-not-found]
     except ImportError:
@@ -51,7 +51,7 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
         marks: list[pytest.MarkDecorator] = []
         if name == "cuda":
             marks.append(pytest.mark.gpu)
-            if not _cuda_available():
+            if not cuda_available():
                 marks.append(pytest.mark.skip(reason="no CUDA device or CuPy not installed"))
         params.append(pytest.param(name, id=name, marks=marks))
     metafunc.parametrize("backend", params)

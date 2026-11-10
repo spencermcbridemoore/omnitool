@@ -3,7 +3,8 @@
 The reference-independence half of T9 lives in ``test_scaffold.py``
 (``test_reference_package_is_independent_of_backends``). This file compares
 every implemented device backend with ``cpu`` on the T4 problems. With no
-device backend registered the comparison is skipped, not xfailed.
+device backend registered, no device present, or the device backend excluded
+by ``--backend``, the comparison is skipped, not xfailed.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ import numpy as np
 import pytest
 
 import omnitool.backends
+from conftest import cuda_available
 from omnitool import Status
 from problems import ALL_CASES, Case, reference_on_grid, save_grid, solve
 
@@ -25,9 +27,15 @@ if not DEVICE_BACKENDS:
 CASES = [pytest.param(c, id=c.name) for c in ALL_CASES]
 
 
-@pytest.fixture(params=DEVICE_BACKENDS)
+@pytest.fixture(params=[pytest.param(b, marks=pytest.mark.gpu) for b in DEVICE_BACKENDS])
 def device_backend(request: pytest.FixtureRequest) -> str:
-    return request.param
+    name = request.param
+    wanted = request.config.getoption("--backend")
+    if wanted and name not in wanted:
+        pytest.skip(f"{name} excluded by --backend")
+    if name == "cuda" and not cuda_available():
+        pytest.skip("no CUDA device or CuPy not installed")
+    return name
 
 
 @pytest.mark.parametrize("pair_index", [0, 1], ids=["tol0", "tol1"])

@@ -18,10 +18,15 @@ H_VALUES = (0.2, 0.1, 0.05)
 
 def one_step_dense(backend: str, h: float):
     """``(y0, y1, dense(0), dense(0.5), dense(1))`` for one step of size ``h`` on S2."""
-    if backend != "cpu":
-        pytest.xfail(f"device dense() entry point for {backend!r} not implemented yet")
     y0 = S2.y0.astype(np.float64)
     p = S2.params.astype(np.float64)
+    if backend == "cuda":
+        from omnitool.backends.cuda import dense_cuda
+
+        theta = np.array([0.0, 0.5, 1.0])
+        y1, d = dense_cuda(S2.problem, y0[None, :], p[None, :], 0.0, h, theta, np.float64)
+        return y0, y1[0], d[0, 0], d[0, 1], d[0, 2]
+    assert backend == "cpu", backend
     rhs = S2.problem.rhs_numpy
     k1 = rhs(np.float64(0.0), y0, p)
     y1, k, _ = ref.step(rhs, np.float64(0.0), y0, np.float64(h), p, k1, np.float64)
