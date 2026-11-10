@@ -111,7 +111,8 @@ quote-style = "double"
 docstring-code-format = true
 
 [tool.pyright]
-include = ["src", "tests"]
+include = ["src", "tests", "benchmarks"]
+extraPaths = ["tests"]  # benchmarks import the spec §7 problems from tests/problems.py
 exclude = ["docs", "**/__pycache__", ".venv"]
 pythonVersion = "3.11"
 typeCheckingMode = "standard"

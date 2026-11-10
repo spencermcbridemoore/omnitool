@@ -28,6 +28,7 @@ src/omnitool/**/_build/
 
 # Benchmark outputs: manifests are committed deliberately under benchmarks/results/
 benchmarks/scratch/
+benchmarks/results/**/raw/
 
 # Notebooks
 .ipynb_checkpoints/

@@ -30,6 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   several 128-thread blocks.
 - The `cuda` backend rejects `max_steps` above 357 913 940 (the `n_fev`
   counter is an int32) and names the CuPy extras when CuPy is missing.
+- `benchmarks/bench_dopri5.py` (spec §9): problem L with `Delta` cycled over
+  `{0, 2, 20, 200}` at `n_members in {1024, 16384, 262144}`, one precision
+  per run, with the T4 correctness gate before any timer, compile time
+  reported separately, the stream synchronised before every timer stops,
+  the compile / H2D / kernel / D2H split, a same-machine `cpu` baseline, and
+  a `manifest.json` under `benchmarks/results/<date>-<precision>/` with the
+  provenance `AGENTS.md` requires. Raw outputs under `raw/` are git-ignored.
 
 ## [0.1.0] - 2026-10-21
 
