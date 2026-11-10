@@ -1,0 +1,491 @@
+{
+  "schema": 1,
+  "script": "benchmarks/bench_dopri5.py",
+  "timestamp_utc": "2026-11-10T06:48:52+00:00",
+  "omnitool_version": "0.1.0",
+  "git": {
+    "commit": "aebaea37ad267cf30bf4cbc5521fec1269434c44",
+    "dirty": false,
+    "dirty_rule": "tracked files differ from HEAD; untracked files are listed instead",
+    "untracked_files": [
+      "benchmarks/results/2026-11-10-fp64/manifest.json",
+      "benchmarks/results/run-fp32.log",
+      "benchmarks/results/run-fp64.log"
+    ]
+  },
+  "uv_lock_sha256": "2adb37b8619eabd4b43a0d431dedaeb92eff263eb92a6cb4cfa0c441e4f41f05",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.0",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "cupy": "14.2.0",
+    "cuda_runtime": 13020,
+    "cuda_driver": 13030,
+    "nvrtc": "13.1",
+    "nvidia_smi": {
+      "name": "NVIDIA GeForce RTX 4090",
+      "driver_version": "610.88",
+      "memory.total": "24564 MiB"
+    },
+    "gpu_arch": "sm_89",
+    "gpu_multiprocessors": 128,
+    "cpu_model": "13th Gen Intel(R) Core(TM) i9-13900K",
+    "cpu_threads": 32
+  },
+  "problem": {
+    "name": "L: two-level optical Bloch (tests/problems.py, spec section 7)",
+    "n_state": 3,
+    "n_params": 3,
+    "y0": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "gamma": 1.0,
+    "omega": 1.0,
+    "delta_cycle": [
+      0.0,
+      2.0,
+      20.0,
+      200.0
+    ],
+    "delta_rule": "member m gets delta_cycle[m % 4]",
+    "t_span": [
+      0.0,
+      10.0
+    ],
+    "t_save": "linspace(0, 10, 51)",
+    "reference": "closed form via scipy.linalg.expm (augmented exponential)"
+  },
+  "precision": "fp32",
+  "dtype": "float32",
+  "rtol": 0.0001,
+  "atol": 1e-06,
+  "max_steps": 100000,
+  "step_mode": "AUTO (hinit)",
+  "nvrtc_options": [
+    "-std=c++11",
+    "-lineinfo",
+    "-ftz=false",
+    "-prec-div=true",
+    "-prec-sqrt=true",
+    "-fmad=true",
+    "-arch=sm_89"
+  ],
+  "fma": "contraction allowed (-fmad=true)",
+  "fast_math": false,
+  "seed": {
+    "entropy": 310797392668744871746283553232439711117,
+    "use": "selects the members checked by the correctness gate; inputs are deterministic"
+  },
+  "timing": {
+    "clock": "time.perf_counter; the CUDA stream is synchronised before every stop",
+    "warmup": "one untimed launch per size before the timed repeats",
+    "compile": "excluded from every launch; the first compile of the process is compile_s",
+    "h2d_s": "device allocation, NaN/zero fills and host-to-device uploads",
+    "kernel_s": "dopri5_solve launch to stream synchronisation",
+    "d2h_s": "device-to-host copies",
+    "host_transpose_s": "host transpose to the (n_members, n_save, n_state) API layout"
+  },
+  "compile_s": 0.09664390003308654,
+  "launch_path_check": {
+    "n_members": 1024,
+    "bitwise_equal_to_solve_batch": true
+  },
+  "cpu_baseline": {
+    "backend": "cpu (omnitool.backends.cpu: the NumPy reference, one member at a time)",
+    "max_members": 1024,
+    "note": "sizes above max_members are not run on the cpu backend; see README"
+  },
+  "batches": [
+    {
+      "n_members": 1024,
+      "inputs_sha256": "b8addf71e0cee5508d29c2c4d8cc1ce875284d85deb1b3bcd54def75dc672ae9",
+      "gpu_gate": {
+        "rule": "max |y - y_ref| <= 10 * (rtol * ymax + atol), ymax per Delta over the save grid",
+        "n_sampled": 1024,
+        "n_members": 1024,
+        "max_error": 0.00017329265040343968,
+        "bound": 0.00101,
+        "worst_fraction_of_bound": 0.17157688158756404,
+        "worst_member": 3,
+        "worst_delta": 200.0,
+        "max_error_by_delta": {
+          "0": 1.5796538869627952e-05,
+          "2": 1.990735703789881e-05,
+          "20": 3.301687951539484e-05,
+          "200": 0.00017329265040343968
+        }
+      },
+      "gpu": {
+        "repeats": 5,
+        "runs": [
+          {
+            "h2d_s": 0.0002787001430988312,
+            "kernel_s": 0.0010656998492777348,
+            "d2h_s": 0.00017360015772283077,
+            "host_transpose_s": 9.240000508725643e-05,
+            "total_s": 0.0016104001551866531
+          },
+          {
+            "h2d_s": 0.00021929992362856865,
+            "kernel_s": 0.0010625000577419996,
+            "d2h_s": 0.00016280007548630238,
+            "host_transpose_s": 9.26000066101551e-05,
+            "total_s": 0.0015372000634670258
+          },
+          {
+            "h2d_s": 0.00018529989756643772,
+            "kernel_s": 0.001064100069925189,
+            "d2h_s": 0.00016109994612634182,
+            "host_transpose_s": 8.9599983766675e-05,
+            "total_s": 0.0015000998973846436
+          },
+          {
+            "h2d_s": 0.00018029985949397087,
+            "kernel_s": 0.001061100047081709,
+            "d2h_s": 0.0001634000800549984,
+            "host_transpose_s": 8.789985440671444e-05,
+            "total_s": 0.0014926998410373926
+          },
+          {
+            "h2d_s": 0.00018019997514784336,
+            "kernel_s": 0.0010632001794874668,
+            "d2h_s": 0.00016709999181330204,
+            "host_transpose_s": 8.709984831511974e-05,
+            "total_s": 0.001497599994763732
+          }
+        ],
+        "summary": {
+          "h2d_s": {
+            "median": 0.00018529989756643772,
+            "min": 0.00018019997514784336,
+            "max": 0.0002787001430988312
+          },
+          "kernel_s": {
+            "median": 0.0010632001794874668,
+            "min": 0.001061100047081709,
+            "max": 0.0010656998492777348
+          },
+          "d2h_s": {
+            "median": 0.0001634000800549984,
+            "min": 0.00016109994612634182,
+            "max": 0.00017360015772283077
+          },
+          "host_transpose_s": {
+            "median": 8.9599983766675e-05,
+            "min": 8.709984831511974e-05,
+            "max": 9.26000066101551e-05
+          },
+          "total_s": {
+            "median": 0.0015000998973846436,
+            "min": 0.0014926998410373926,
+            "max": 0.0016104001551866531
+          }
+        },
+        "outputs_sha256": "a7bde21a2bd2660089179662f586f2f684f737c68fb2fab5f63df7e27cd8d169",
+        "steps": {
+          "n_accepted": {
+            "min": 18,
+            "max": 1754,
+            "mean": 510.75
+          },
+          "n_rejected": {
+            "min": 0,
+            "max": 31,
+            "mean": 8.5
+          },
+          "n_fev": {
+            "min": 110,
+            "max": 10538,
+            "mean": 3117.5
+          },
+          "n_accepted_by_delta": {
+            "0": 18.0,
+            "2": 33.0,
+            "20": 238.0,
+            "200": 1754.0
+          }
+        }
+      },
+      "cpu_gate": {
+        "rule": "max |y - y_ref| <= 10 * (rtol * ymax + atol), ymax per Delta over the save grid",
+        "n_sampled": 1024,
+        "n_members": 1024,
+        "max_error": 0.00017351477083748547,
+        "bound": 0.00101,
+        "worst_fraction_of_bound": 0.17179680280939155,
+        "worst_member": 3,
+        "worst_delta": 200.0,
+        "max_error_by_delta": {
+          "0": 1.596874370746182e-05,
+          "2": 2.2359820102235695e-05,
+          "20": 3.44841943615351e-05,
+          "200": 0.00017351477083748547
+        }
+      },
+      "cpu": {
+        "repeats": 1,
+        "wall_s": [
+          31.45347939990461
+        ],
+        "summary": {
+          "median": 31.45347939990461,
+          "min": 31.45347939990461,
+          "max": 31.45347939990461
+        },
+        "outputs_sha256": "a473db9358c2856ccac9b24404e7f42445be0f5e52a64c7cbc099fce0a297b4d",
+        "steps": {
+          "n_accepted": {
+            "min": 18,
+            "max": 1754,
+            "mean": 510.25
+          },
+          "n_rejected": {
+            "min": 0,
+            "max": 26,
+            "mean": 7.0
+          },
+          "n_fev": {
+            "min": 110,
+            "max": 10538,
+            "mean": 3105.5
+          },
+          "n_accepted_by_delta": {
+            "0": 18.0,
+            "2": 32.0,
+            "20": 237.0,
+            "200": 1754.0
+          }
+        }
+      },
+      "ratio_cpu_wall_over_gpu_kernel": 29583.779241898996,
+      "ratio_cpu_wall_over_gpu_total": 20967.589861676766
+    },
+    {
+      "n_members": 16384,
+      "inputs_sha256": "ef8b9f69c61f7e03caefeabaab314111d4219b8350366bf173f61e4b24193b57",
+      "gpu_gate": {
+        "rule": "max |y - y_ref| <= 10 * (rtol * ymax + atol), ymax per Delta over the save grid",
+        "n_sampled": 4096,
+        "n_members": 16384,
+        "max_error": 0.00017329265040343968,
+        "bound": 0.00101,
+        "worst_fraction_of_bound": 0.17157688158756404,
+        "worst_member": 15,
+        "worst_delta": 200.0,
+        "max_error_by_delta": {
+          "0": 1.5796538869627952e-05,
+          "2": 1.990735703789881e-05,
+          "20": 3.301687951539484e-05,
+          "200": 0.00017329265040343968
+        }
+      },
+      "gpu": {
+        "repeats": 5,
+        "runs": [
+          {
+            "h2d_s": 0.0008332999423146248,
+            "kernel_s": 0.00391470012255013,
+            "d2h_s": 0.003379100002348423,
+            "host_transpose_s": 0.010737599804997444,
+            "total_s": 0.018864699872210622
+          },
+          {
+            "h2d_s": 0.0006788000464439392,
+            "kernel_s": 0.003943899879232049,
+            "d2h_s": 0.003452000208199024,
+            "host_transpose_s": 0.010885600000619888,
+            "total_s": 0.0189603001344949
+          },
+          {
+            "h2d_s": 0.0007187000010162592,
+            "kernel_s": 0.0039058998227119446,
+            "d2h_s": 0.0035568999592214823,
+            "host_transpose_s": 0.011075600050389767,
+            "total_s": 0.019257099833339453
+          },
+          {
+            "h2d_s": 0.0007438999600708485,
+            "kernel_s": 0.003911200212314725,
+            "d2h_s": 0.003424599999561906,
+            "host_transpose_s": 0.010829499922692776,
+            "total_s": 0.018909200094640255
+          },
+          {
+            "h2d_s": 0.0007588001899421215,
+            "kernel_s": 0.003946800017729402,
+            "d2h_s": 0.0036201998591423035,
+            "host_transpose_s": 0.011822200147435069,
+            "total_s": 0.020148000214248896
+          }
+        ],
+        "summary": {
+          "h2d_s": {
+            "median": 0.0007438999600708485,
+            "min": 0.0006788000464439392,
+            "max": 0.0008332999423146248
+          },
+          "kernel_s": {
+            "median": 0.00391470012255013,
+            "min": 0.0039058998227119446,
+            "max": 0.003946800017729402
+          },
+          "d2h_s": {
+            "median": 0.003452000208199024,
+            "min": 0.003379100002348423,
+            "max": 0.0036201998591423035
+          },
+          "host_transpose_s": {
+            "median": 0.010885600000619888,
+            "min": 0.010737599804997444,
+            "max": 0.011822200147435069
+          },
+          "total_s": {
+            "median": 0.0189603001344949,
+            "min": 0.018864699872210622,
+            "max": 0.020148000214248896
+          }
+        },
+        "outputs_sha256": "26e58af41864092fc4afbe801dbc7421d6cec283dfb18c165d746807f9f743c8",
+        "steps": {
+          "n_accepted": {
+            "min": 18,
+            "max": 1754,
+            "mean": 510.75
+          },
+          "n_rejected": {
+            "min": 0,
+            "max": 31,
+            "mean": 8.5
+          },
+          "n_fev": {
+            "min": 110,
+            "max": 10538,
+            "mean": 3117.5
+          },
+          "n_accepted_by_delta": {
+            "0": 18.0,
+            "2": 33.0,
+            "20": 238.0,
+            "200": 1754.0
+          }
+        }
+      },
+      "cpu": null
+    },
+    {
+      "n_members": 262144,
+      "inputs_sha256": "a631182edf4131b8ef350cfc159ac58e21af3b6dbdd23b437c34a1e466851576",
+      "gpu_gate": {
+        "rule": "max |y - y_ref| <= 10 * (rtol * ymax + atol), ymax per Delta over the save grid",
+        "n_sampled": 4096,
+        "n_members": 262144,
+        "max_error": 0.00017329265040343968,
+        "bound": 0.00101,
+        "worst_fraction_of_bound": 0.17157688158756404,
+        "worst_member": 651,
+        "worst_delta": 200.0,
+        "max_error_by_delta": {
+          "0": 1.5796538869627952e-05,
+          "2": 1.990735703789881e-05,
+          "20": 3.301687951539484e-05,
+          "200": 0.00017329265040343968
+        }
+      },
+      "gpu": {
+        "repeats": 5,
+        "runs": [
+          {
+            "h2d_s": 0.0056953998282551765,
+            "kernel_s": 0.02699220017530024,
+            "d2h_s": 0.029812099877744913,
+            "host_transpose_s": 0.12901300005614758,
+            "total_s": 0.1915126999374479
+          },
+          {
+            "h2d_s": 0.009382199961692095,
+            "kernel_s": 0.036633400013670325,
+            "d2h_s": 0.05401049996726215,
+            "host_transpose_s": 0.13149149995297194,
+            "total_s": 0.2315175998955965
+          },
+          {
+            "h2d_s": 0.011268200119957328,
+            "kernel_s": 0.03664730000309646,
+            "d2h_s": 0.052590199979022145,
+            "host_transpose_s": 0.18211920000612736,
+            "total_s": 0.2826249001082033
+          },
+          {
+            "h2d_s": 0.006081300089135766,
+            "kernel_s": 0.023353799944743514,
+            "d2h_s": 0.030755999963730574,
+            "host_transpose_s": 0.16938899992965162,
+            "total_s": 0.22958009992726147
+          },
+          {
+            "h2d_s": 0.005822200095281005,
+            "kernel_s": 0.02290689991787076,
+            "d2h_s": 0.026932500069960952,
+            "host_transpose_s": 0.16917589982040226,
+            "total_s": 0.22483749990351498
+          }
+        ],
+        "summary": {
+          "h2d_s": {
+            "median": 0.006081300089135766,
+            "min": 0.0056953998282551765,
+            "max": 0.011268200119957328
+          },
+          "kernel_s": {
+            "median": 0.02699220017530024,
+            "min": 0.02290689991787076,
+            "max": 0.03664730000309646
+          },
+          "d2h_s": {
+            "median": 0.030755999963730574,
+            "min": 0.026932500069960952,
+            "max": 0.05401049996726215
+          },
+          "host_transpose_s": {
+            "median": 0.16917589982040226,
+            "min": 0.12901300005614758,
+            "max": 0.18211920000612736
+          },
+          "total_s": {
+            "median": 0.22958009992726147,
+            "min": 0.1915126999374479,
+            "max": 0.2826249001082033
+          }
+        },
+        "outputs_sha256": "3fb189c246d42997ed7145849a83f24771e78ba9318b4102e2aa817bb22380d1",
+        "steps": {
+          "n_accepted": {
+            "min": 18,
+            "max": 1754,
+            "mean": 510.75
+          },
+          "n_rejected": {
+            "min": 0,
+            "max": 31,
+            "mean": 8.5
+          },
+          "n_fev": {
+            "min": 110,
+            "max": 10538,
+            "mean": 3117.5
+          },
+          "n_accepted_by_delta": {
+            "0": 18.0,
+            "2": 33.0,
+            "20": 238.0,
+            "200": 1754.0
+          }
+        }
+      },
+      "cpu": null
+    }
+  ]
+}

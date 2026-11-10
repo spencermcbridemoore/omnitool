@@ -37,6 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the compile / H2D / kernel / D2H split, a same-machine `cpu` baseline, and
   a `manifest.json` under `benchmarks/results/<date>-<precision>/` with the
   provenance `AGENTS.md` requires. Raw outputs under `raw/` are git-ignored.
+- The first two manifests, `benchmarks/results/2026-11-10-fp64/` and
+  `benchmarks/results/2026-11-10-fp32/`, from the RTX 4090 (driver 610.88,
+  CuPy 14.2.0, NVRTC 13.1), with the results table and its caveats in
+  `benchmarks/README.md`. This completes the Phase 0 definition of done
+  (spec §10) on the workstation; published numbers still come from Newton.
 
 ## [0.1.0] - 2026-10-21
 
