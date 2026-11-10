@@ -567,7 +567,8 @@ def main(argv: list[str] | None = None) -> None:
         manifest["batches"].append(batch)
 
     manifest_path = out_dir / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    text = json.dumps(manifest, indent=2) + "\n"
+    manifest_path.write_text(text, encoding="utf-8", newline="\n")  # the repository is LF
     print(f"\nwrote {manifest_path}")
 
 
