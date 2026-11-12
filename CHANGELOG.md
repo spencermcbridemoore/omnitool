@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-11
+
+Phase 0 complete: the DOPRI5 device kernel and `cuda` backend, T1-T9
+passing on `cpu` and `cuda` on the RTX 4090, and the first benchmark
+manifests at both precisions.
+
 ### Added
 
 - The `cuda` backend (`omnitool.backends.cuda`, registered in
@@ -113,6 +119,7 @@ The first tagged state: design record and scaffold, no solver yet.
   `cudasim` / `cuda`, CPU CI on push, `workflow_dispatch`-gated GPU job for
   the self-hosted RTX 4090 runner, `CITATION.cff`.
 
-[Unreleased]: https://github.com/spencermcbridemoore/omnitool/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/spencermcbridemoore/omnitool/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/spencermcbridemoore/omnitool/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/spencermcbridemoore/omnitool/compare/v0.0.0...v0.1.0
 [0.0.0]: https://github.com/spencermcbridemoore/omnitool/releases/tag/v0.0.0

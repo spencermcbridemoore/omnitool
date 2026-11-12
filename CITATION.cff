@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use omnitool, please cite it using the metadata below."
 title: "omnitool: a common GPU ensemble ODE core"
 type: software
-version: 0.1.0
-date-released: "2026-10-21"
+version: 0.2.0
+date-released: "2026-11-11"
 license: Apache-2.0
 repository-code: "https://github.com/spencermcbridemoore/omnitool"
 authors:
