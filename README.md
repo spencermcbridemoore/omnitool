@@ -19,6 +19,8 @@ T1–T9 passing on both. No benchmark has been run yet.
   doors, precision policy, verification layer, backend choice.
 - [`docs/PHASE0_SPEC.md`](docs/PHASE0_SPEC.md) — the vertical slice and its
   acceptance tests as concrete assertions.
+- [`docs/PHASE1_SPEC.md`](docs/PHASE1_SPEC.md) — the linear front door
+  (Rodas5P on affine-linear systems); specified, not yet built.
 - [`AGENTS.md`](AGENTS.md) — operating rules for humans and agents working
   in this repository.
 - [`docs/handoff/`](docs/handoff/) — the research-phase handoff, including

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The Phase 1 design record, with no solver code yet:
+  `docs/PHASE1_SPEC.md` specifies the first cut of the linear front door
+  (Rodas5P on affine-linear systems through a new `AffineProblem`, dense LU
+  with partial pivoting per member, static cost-sorted scheduling, on-chip
+  observables and group sums, `save_mode="clip"` by default) with acceptance
+  tests T10–T23 calibrated on the host, the RydIQule adapter contract and
+  the baseline and benchmark plan. ADRs 0006–0013 record the rulings behind
+  it.
+
+### Changed
+
+- `AGENTS.md`: a tableau published only as decimals is transcribed verbatim
+  from the source its paper designates and tested to a tolerance (ADR 0007);
+  modax joins cubie as a competitor baseline; baselines live under
+  `benchmarks/baselines/` (ADR 0011).
+- The source distribution includes `docs/PHASE1_SPEC.md`.
+
 ## [0.2.0] - 2026-11-11
 
 Phase 0 complete: the DOPRI5 device kernel and `cuda` backend, T1-T9

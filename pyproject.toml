@@ -67,7 +67,7 @@ path = "src/omnitool/__init__.py"
 packages = ["src/omnitool"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/omnitool", "tests", "docs/adr", "docs/PHASE0_SPEC.md", "CHANGELOG.md", "CITATION.cff"]
+include = ["src/omnitool", "tests", "docs/adr", "docs/PHASE0_SPEC.md", "docs/PHASE1_SPEC.md", "CHANGELOG.md", "CITATION.cff"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"

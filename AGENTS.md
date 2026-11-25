@@ -6,7 +6,8 @@ serves RydIQule, pylcp, MoleCool, the UCN spin tracker and similar codes
 through thin adapters. `CLAUDE.md` is a symlink to this file.
 
 Read before non-trivial work: `docs/adr/` (the decisions and why),
-`docs/PHASE0_SPEC.md` (what is being built now), and
+`docs/PHASE1_SPEC.md` (what is being built now), `docs/PHASE0_SPEC.md` (what
+exists, and the model for a spec), and
 `docs/handoff/00-gpu-ensemble-core-handoff.md` (the research record).
 Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
 
@@ -21,7 +22,8 @@ Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
   requests from forks.
 - **Two front doors over shared machinery** (ADR 0001): affine-linear master
   equations with an analytic Jacobian, and nonlinear trajectories with
-  events. Phase 0 builds the shared explicit slice; see the spec.
+  events. Phase 0 built the shared explicit slice; Phase 1 builds the first
+  cut of the affine-linear door (ADR 0006); see the specs.
 - **Never materialise a full parameter stack.** Assemble each member's
   system on-chip, integrate it, reduce on-chip.
 - **Kernel sources stay backend-agnostic** (ADR 0004): plain C in `.cu`
@@ -40,9 +42,12 @@ Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
   and must not vanish on a linear constant-coefficient problem.
 - **Transcribe tableaus from the primary source** (Dormand & Prince 1980;
   Hairer, Nørsett & Wanner) as exact rationals, once, with identity tests.
+  A tableau published only as decimals (Rodas5P) is copied verbatim from the
+  source its paper designates and tested to a stated tolerance (ADR 0007).
 - **Never copy Numerical Recipes or GPL code.** The old UCN CUDA kernel
   (Numerical-Recipes-derived, and wrong) is an architectural template only;
-  PQLS is GPL-3.0; cubie is MIT but is a benchmark baseline, not a source.
+  PQLS is GPL-3.0; cubie and modax are MIT but are benchmark baselines, not
+  sources.
 - **Tolerances by precision mode** for agreement with references on
   well-conditioned problems: ≤ 1e-10 for FP64 and mixed, ≤ 1e-6 for FP32.
   Adaptive runs are judged by tolerance-scaled bounds (spec T4).
@@ -67,9 +72,11 @@ Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
 - Exclude warm-up and compile time; report compile time separately.
 - Report speedup against a same-node CPU baseline at **matched precision and
   matched achieved accuracy**, and include competitors where they apply
-  (cubie for per-member adaptive stepping, PQLS for steady state,
-  DiffEqGPU.jl). Fair-comparison rule with cubie: same problem, both at
-  float64, fastmath off, matched achieved accuracy, compile time separate.
+  (cubie and modax for per-member adaptive stepping, PQLS for steady state,
+  DiffEqGPU.jl). Baselines live under `benchmarks/baselines/` with their own
+  pinned environments (ADR 0011). Fair-comparison rule with cubie: same
+  problem, both at float64, fastmath off, matched achieved accuracy, compile
+  time separate.
 - Every published number has a run manifest: git commit and dirty flag,
   lock-file hash, container digest if any, `nvidia-smi` query, Slurm job ID
   where applicable, precision and FMA flags, seeds via `SeedSequence`,
@@ -126,7 +133,9 @@ Anything you decide goes into a new ADR under `docs/adr/`, not into chat.
 ## Licensing
 
 - `omnitool` is Apache-2.0. RydIQule is Apache-2.0; keep its attribution in
-  the adapter. cubie is MIT. PQLS is GPL-3.0: do not copy its code.
+  the adapter. cubie and modax are MIT. PQLS is GPL-3.0: do not copy its
+  code. The Rodas5P coefficients come from OrdinaryDiffEq.jl (MIT); keep its
+  attribution in the tableau file (ADR 0007).
 
 ## Adapter notes (for Phase 1, kept from the research phase)
 
